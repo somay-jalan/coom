@@ -13,9 +13,9 @@ import torch.nn.functional as F
 from megatron import core
 from megatron.core import mpu, tensor_parallel
 from megatron.core.enums import ModelType
-from legacy.model.enums import AttnMaskType, LayerType, AttnType
-from legacy.model.fused_softmax import FusedScaleMaskSoftmax
-from legacy.model.fused_bias_gelu import bias_gelu_impl
+from coom.legacy.model.enums import AttnMaskType, LayerType, AttnType
+from coom.legacy.model.fused_softmax import FusedScaleMaskSoftmax
+from coom.legacy.model.fused_bias_gelu import bias_gelu_impl
 from megatron.core.models.common.embeddings import apply_rotary_pos_emb
 from megatron.core.jit import jit_fuser
 from megatron.core.num_microbatches_calculator import get_num_microbatches
@@ -29,16 +29,16 @@ from megatron.core.tensor_parallel import (
     get_cuda_rng_tracker,
     get_data_parallel_rng_tracker_name,
 )
-from legacy.model.enums import AttnMaskType, AttnType, LayerType
-from legacy.model.fused_bias_gelu import bias_gelu_impl
-from legacy.model.fused_softmax import FusedScaleMaskSoftmax
-from legacy.model.utils import (
+from coom.legacy.model.enums import AttnMaskType, AttnType, LayerType
+from coom.legacy.model.fused_bias_gelu import bias_gelu_impl
+from coom.legacy.model.fused_softmax import FusedScaleMaskSoftmax
+from coom.legacy.model.utils import (
     attention_mask_func,
     erf_gelu,
     get_norm,
     openai_gelu,
 )
-from training import get_args, get_timers
+from coom.training import get_args, get_timers
 
 from .module import MegatronModule
 

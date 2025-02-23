@@ -4,12 +4,12 @@
 
 import torch
 
-from training import get_args
+from coom.training import get_args
 from megatron.core import tensor_parallel
-from legacy.model.enums import AttnMaskType
-from legacy.model.language_model import parallel_lm_logits, get_language_model
-from legacy.model import LayerNorm
-from legacy.model.utils import (
+from coom.legacy.model.enums import AttnMaskType
+from coom.legacy.model.language_model import parallel_lm_logits, get_language_model
+from coom.legacy.model import LayerNorm
+from coom.legacy.model.utils import (
     openai_gelu,
     get_linear_layer
 )

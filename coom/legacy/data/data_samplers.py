@@ -7,7 +7,7 @@ import random
 import torch
 import numpy as np
 from torch.utils.data import Dataset
-from training import get_args
+from coom.training import get_args
 from megatron.core import mpu
 
 

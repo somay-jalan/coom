@@ -32,7 +32,7 @@ from megatron.core.utils import (
 from .checkpointing import load_checkpoint
 from .checkpointing import save_checkpoint
 from .checkpointing import checkpoint_exists
-from legacy.model import Float16Module
+from coom.legacy.model import Float16Module
 from megatron.core.distributed import DistributedDataParallelConfig
 from megatron.core.distributed import DistributedDataParallel as DDP
 try:
@@ -51,14 +51,14 @@ from megatron.core.rerun_state_machine import (
     RerunDataIterator,
     RerunMode,
 )
-from training.initialize import initialize_megatron
-from training.initialize import write_args_to_tensorboard
-from training.initialize import set_jit_fusion_options
-from training.utils import (
+from coom.training.initialize import initialize_megatron
+from coom.training.initialize import write_args_to_tensorboard
+from coom.training.initialize import set_jit_fusion_options
+from coom.training.utils import (
     get_batch_on_this_cp_rank,
     get_batch_on_this_tp_rank,
 )
-from legacy.data.data_samplers import build_pretraining_data_loader
+from coom.legacy.data.data_samplers import build_pretraining_data_loader
 from megatron.core.optimizer_param_scheduler import OptimizerParamScheduler
 from megatron.core.transformer.moe import upcycling_utils
 from megatron.core.transformer.moe.moe_utils import track_moe_metrics

@@ -4,17 +4,17 @@
 
 import torch
 
-from training import get_args
+from coom.training import get_args
 from megatron.core import tensor_parallel
-from legacy.model.enums import AttnMaskType
-from legacy.model.language_model import parallel_lm_logits
-from legacy.model.language_model import get_language_model
-from legacy.model.utils import get_norm
-from legacy.model.utils import openai_gelu, erf_gelu
-from legacy.model.utils import get_linear_layer
-from legacy.model.utils import init_method_normal
-from legacy.model.utils import scaled_init_method_normal
-from .module import MegatronModule
+from coom.legacy.model.enums import AttnMaskType
+from coom.legacy.model.language_model import parallel_lm_logits
+from coom.legacy.model.language_model import get_language_model
+from coom.legacy.model.utils import get_norm
+from coom.legacy.model.utils import openai_gelu, erf_gelu
+from coom.legacy.model.utils import get_linear_layer
+from coom.legacy.model.utils import init_method_normal
+from coom.legacy.model.utils import scaled_init_method_normal
+from coom.legacy.model.module import MegatronModule
 
 
 def bert_extended_attention_mask(attention_mask):

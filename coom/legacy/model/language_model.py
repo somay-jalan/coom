@@ -8,7 +8,7 @@ import torch.nn.functional as F
 from megatron.core import mpu, tensor_parallel
 from megatron.core.enums import ModelType
 from megatron.core.models.common.embeddings.rotary_pos_embedding import RotaryEmbedding
-from training import get_args
+from coom.training import get_args
 
 from .enums import AttnMaskType, LayerType
 from .module import MegatronModule

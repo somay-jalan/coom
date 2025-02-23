@@ -23,7 +23,7 @@ from megatron.core.rerun_state_machine import (
     initialize_rerun_state_machine,
 )
 from megatron.core.utils import get_te_version, is_te_min_version, is_torch_min_version
-from legacy import fused_kernels
+from coom.legacy import fused_kernels
 from . import get_adlr_autoresume, get_args, get_tensorboard_writer
 from .arguments import parse_args, validate_args
 from .async_utils import init_persistent_async_worker

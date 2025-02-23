@@ -6,8 +6,8 @@ import math
 
 import torch
 
-from training import get_args
-from legacy.model import LayerNorm, RMSNorm
+from coom.training import get_args
+from coom.legacy.model import LayerNorm, RMSNorm
 from megatron.core.jit import jit_fuser
 
 def init_method_normal(sigma):

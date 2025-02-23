@@ -3,7 +3,7 @@
 
 import torch
 import torch.nn as nn
-from legacy.model.enums import AttnMaskType
+from coom.legacy.model.enums import AttnMaskType
 
 
 class ScaledUpperTriangMaskedSoftmax(torch.autograd.Function):

@@ -4,7 +4,7 @@
 
 import torch
 
-from training import get_args
+from coom.training import get_args
 from megatron.core import tensor_parallel
 from .module import MegatronModule
 

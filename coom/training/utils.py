@@ -41,8 +41,8 @@ from megatron.core.utils import (
     get_data_parallel_group_if_dtensor,
     to_local_if_dtensor,
 )
-from legacy.model import Float16Module
-from legacy.model.module import param_is_not_shared
+from coom.legacy.model import Float16Module
+from coom.legacy.model.module import param_is_not_shared
 
 try:
     from megatron.core.distributed import TorchFullyShardedDataParallel as torch_FSDP

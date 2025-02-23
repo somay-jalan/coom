@@ -6,7 +6,7 @@ import torch
 from torch.autograd import Variable
 from torch.nn.parameter import Parameter
 
-from training import get_args
+from coom.training import get_args
 from megatron.core import mpu, tensor_parallel
 
 
