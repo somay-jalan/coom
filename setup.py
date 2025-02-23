@@ -5,8 +5,8 @@ setup(
     version='0.1.0',
     description='Large Scale LLM Pretraining Codebase',
     author='Soket AI',
-    packages=find_packages(where='src'),
-    package_dir={'': 'src'},
+    packages=find_packages(where='.'),
+    package_dir={'': '.'},
     python_requires='>=3.10',
     install_requires=[
     ],
