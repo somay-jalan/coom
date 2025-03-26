@@ -1,3 +1,39 @@
 # COOM Training Framework
 
-A training framework for large-scale language models based on Megatron-LM.
+## Overview
+A training framework for large-scale language models based on Megatron-Core, the COOM Training Framework is designed to efficiently handle extensive model training inspired by Deepseek's HAI-LLM optimizations. 
+
+This framework is planned to support state-of-the-art innovations essential for achieving high-performance language modeling, particularly targeting efficiency and scalability for large models.
+
+## Key Objectives
+- Develop an optimized pretraining framework based on Deepseek's HAI-LLM.
+- Enable efficient scaling of large multilingual language models.
+- Incorporate cutting-edge optimizations to maximize training efficiency.
+
+## Planned Features
+
+| Feature                                |
+|----------------------------------------|
+| FP8 Pretraining                        |
+| Mixture of Experts (MoE)               |
+| Multi-Head Latent Attention (MLA)      |
+| Multi-Token Prediction                 |
+| Kernel Fusion                          |
+| KV-Cache Optimisation                  |
+| Load Balancing Experts                 |
+| Progressive Model Expansion            |
+| Energy-Efficient Training              |
+
+## Future Directions
+- Continuous improvements and feedback loops for better alignment and model robustness.
+- Expansion into multilingual and multimodal capabilities.
+- Further optimization for deployment in edge computing scenarios.
+
+## Collaboration and Contribution
+We welcome researchers and developers to contribute to the ongoing development of COOM Training Framework. Regular updates, comprehensive documentation, and open-source contributions are encouraged to foster community-driven improvements.
+
+For more details or to get involved, please contact our team.
+
+---
+
+**Note:** This framework is currently under active development. Performance metrics and benchmarks will be shared in upcoming releases.
