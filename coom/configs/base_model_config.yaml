@@ -1,6 +1,3 @@
-defaults:
-  - dataLoader_config
-
 make_vocab_size_divisible_by: 128
 num_layers: 6
 hidden_size: 384
