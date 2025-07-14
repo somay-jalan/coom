@@ -20,7 +20,7 @@ logger_cfg = OmegaConf.load(os.path.join(prefix, main_cfg.logger_config_path))
 model_cfg.seq_length = data_cfg.seq_length
 if "moe_layer_freq" in model_cfg:
     model_cfg.moe_layer_freq = list(model_cfg.moe_layer_freq)
-
+print(f"model_cfg.moe_layer_freq type,{type(model_cfg.moe_layer_freq)}")
 ModelClass = getattr(model, main_cfg.base_model)
 ConfigClass = getattr(config_classes, main_cfg.base_model_config)
 
