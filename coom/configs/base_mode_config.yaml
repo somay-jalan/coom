@@ -1,0 +1,27 @@
+defaults:
+  - dataLoader_config
+
+make_vocab_size_divisible_by: 128
+num_layers: 6
+hidden_size: 384
+ffn_hidden_size: 1536
+num_attention_heads: 6
+seq_length: ${seq_length}  # get this value from dataLoader_config
+init_method_std: 0.023
+hidden_dropout: 0.1
+attention_dropout: 0.1
+layernorm_epsilon: 1e-5
+num_moe_experts: 16
+moe_ffn_hidden_size: 128
+moe_shared_expert_intermediate_size: 128
+moe_layer_freq: [0, 0, 0, 1, 1, 1]
+moe_router_topk: 2
+moe_router_num_groups: 8
+moe_router_group_topk: 4
+moe_router_topk_scaling_factor: 2.5
+moe_aux_loss_coeff: 0.0001
+moe_router_score_function: "sigmoid"
+moe_router_enable_expert_bias: true
+moe_router_bias_update_rate: 0.001
+mscale: 1.0
+mscale_all_dim: 1.0
