@@ -11,16 +11,12 @@ import config_classes
 main_cfg = OmegaConf.load("configs/main_config.yaml")
 prefix = main_cfg.config_path_prefix
 
-model_cfg = OmegaConf.load(os.path.join(prefix, main_cfg.base_model_configuartion_path))
-data_cfg = OmegaConf.load(os.path.join(prefix, main_cfg.dataLoader_config_path))
-opt_cfg = OmegaConf.load(os.path.join(prefix, main_cfg.optimizer_config_path))
-trainer_cfg = OmegaConf.load(os.path.join(prefix, main_cfg.trainer_config_path))
-logger_cfg = OmegaConf.load(os.path.join(prefix, main_cfg.logger_config_path))
+model_cfg = OmegaConf.to_container(OmegaConf.load(os.path.join(prefix, main_cfg.base_model_configuartion_path)), resolve=True)
+data_cfg = OmegaConf.to_container(OmegaConf.load(os.path.join(prefix, main_cfg.dataLoader_config_path)), resolve=True)
+opt_cfg = OmegaConf.to_container(OmegaConf.load(os.path.join(prefix, main_cfg.optimizer_config_path)), resolve=True)
+trainer_cfg = OmegaConf.to_container(OmegaConf.load(os.path.join(prefix, main_cfg.trainer_config_path)), resolve=True)
+logger_cfg = OmegaConf.to_container(OmegaConf.load(os.path.join(prefix, main_cfg.logger_config_path)), resolve=True)
 
-model_cfg.seq_length = data_cfg.seq_length
-if "moe_layer_freq" in model_cfg:
-    model_cfg.moe_layer_freq = list(model_cfg.moe_layer_freq)
-print(f"model_cfg.moe_layer_freq type,{type(model_cfg.moe_layer_freq)}")
 ModelClass = getattr(model, main_cfg.base_model)
 ConfigClass = getattr(config_classes, main_cfg.base_model_config)
 
