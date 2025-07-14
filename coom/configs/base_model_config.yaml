@@ -3,7 +3,6 @@ num_layers: 6
 hidden_size: 384
 ffn_hidden_size: 1536
 num_attention_heads: 6
-seq_length: ${seq_length}  # get this value from dataLoader_config
 init_method_std: 0.023
 hidden_dropout: 0.1
 attention_dropout: 0.1
