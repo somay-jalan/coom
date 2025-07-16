@@ -5,49 +5,59 @@ from omegaconf import OmegaConf
 from nemo import lightning as nl
 from megatron.core.optimizer import OptimizerConfig
 from nemo.collections import llm
-import model
-import config_classes
+from . import model
+from . import config_classes
 
-main_cfg = OmegaConf.to_container(OmegaConf.load("configs/main_config.yaml"), resolve=True)
+def trainer(config_path):
+    """
+    Trains a model using the main config file path.
+    
+    Args:
+        config_path (str): Path to the main configuration YAML file
+    """
 
-prefix = main_cfg["config_path_prefix"]
+    main_cfg = OmegaConf.to_container(OmegaConf.load(config_path), resolve=True)
 
-model_cfg = OmegaConf.to_container(OmegaConf.load(os.path.join(prefix, main_cfg["base_model_configuartion_path"])), resolve=True)
-data_cfg = OmegaConf.to_container(OmegaConf.load(os.path.join(prefix, main_cfg["dataLoader_config_path"])), resolve=True)
-opt_cfg = OmegaConf.to_container(OmegaConf.load(os.path.join(prefix, main_cfg["optimizer_config_path"])), resolve=True)
-trainer_cfg = OmegaConf.to_container(OmegaConf.load(os.path.join(prefix, main_cfg["trainer_config_path"])), resolve=True)
-logger_cfg = OmegaConf.to_container(OmegaConf.load(os.path.join(prefix, main_cfg["logger_config_path"])), resolve=True)
+    prefix = main_cfg["config_path_prefix"]
 
-ModelClass = getattr(model, main_cfg["base_model"])
-ConfigClass = getattr(config_classes, main_cfg["base_model_config"])
+    model_cfg = OmegaConf.to_container(OmegaConf.load(os.path.join(prefix, main_cfg["base_model_configuartion_path"])), resolve=True)
+    data_cfg = OmegaConf.to_container(OmegaConf.load(os.path.join(prefix, main_cfg["dataLoader_config_path"])), resolve=True)
+    opt_cfg = OmegaConf.to_container(OmegaConf.load(os.path.join(prefix, main_cfg["optimizer_config_path"])), resolve=True)
+    trainer_cfg = OmegaConf.to_container(OmegaConf.load(os.path.join(prefix, main_cfg["trainer_config_path"])), resolve=True)
+    logger_cfg = OmegaConf.to_container(OmegaConf.load(os.path.join(prefix, main_cfg["logger_config_path"])), resolve=True)
 
-model_config = ConfigClass(**model_cfg)
-modelClasss = ModelClass(model_config)
+    ModelClass = getattr(model, main_cfg["base_model"])
+    ConfigClass = getattr(config_classes, main_cfg["base_model_config"])
 
-strategy = nl.MegatronStrategy(**trainer_cfg["strategy"])
-optimizer_config = OptimizerConfig(**opt_cfg)
-optimizer = nl.MegatronOptimizerModule(config=optimizer_config)
+    model_config = ConfigClass(**model_cfg)
+    modelClasss = ModelClass(model_config)
 
-trainer = nl.Trainer(
-    devices=trainer_cfg["devices"],
-    max_steps=trainer_cfg["max_steps"],
-    accelerator=trainer_cfg["accelerator"],
-    strategy=strategy,
-    plugins=nl.MegatronMixedPrecision(precision=trainer_cfg["precision"]),
-)
+    strategy = nl.MegatronStrategy(**trainer_cfg["strategy"])
+    optimizer_config = OptimizerConfig(**opt_cfg)
+    optimizer = nl.MegatronOptimizerModule(config=optimizer_config)
 
-logger = nl.NeMoLogger(log_dir=logger_cfg["log_dir"])
+    trainer = nl.Trainer(
+        devices=trainer_cfg["devices"],
+        max_steps=trainer_cfg["max_steps"],
+        accelerator=trainer_cfg["accelerator"],
+        strategy=strategy,
+        plugins=nl.MegatronMixedPrecision(precision=trainer_cfg["precision"]),
+    )
 
-data = llm.MockDataModule(
-    seq_length=data_cfg["seq_length"],
-    global_batch_size=data_cfg["global_batch_size"],
-)
+    logger = nl.NeMoLogger(log_dir=logger_cfg["log_dir"])
 
-llm.train(
-    model=modelClasss,
-    data=data,
-    trainer=trainer,
-    log=logger,
-    tokenizer="data",
-    optim=optimizer,
-)
+    data = llm.MockDataModule(
+        seq_length=data_cfg["seq_length"],
+        global_batch_size=data_cfg["global_batch_size"],
+    )
+
+    llm.train(
+        model=modelClasss,
+        data=data,
+        trainer=trainer,
+        log=logger,
+        tokenizer="data",
+        optim=optimizer,
+    )
+
+    print("Training completed successfully!")
