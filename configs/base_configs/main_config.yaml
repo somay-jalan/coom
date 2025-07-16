@@ -1,4 +1,4 @@
-config_path_prefix: ./configs/
+config_path_prefix: /
 
 base_model: EKA_DeepSeekV3Model
 

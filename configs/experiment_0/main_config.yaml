@@ -1,0 +1,8 @@
+defaults:
+  - /base_configs/main_config@_here_
+  - _self_
+
+# make sure to add @_here_ like this in defaults to overwite package 
+# make sure _self_ is in the end as it means to inherent last from this file meaning overwriting the inhereted values if needed
+
+#CHANGE THE ARGUMENTS BELOW

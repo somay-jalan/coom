@@ -1,0 +1,7 @@
+defaults:
+  - /base_configs/base_model_config.yaml@_here_ 
+  - _self_
+# make sure _self_ is in the end as it means to inherent last from this file meaning overwriting the inhereted values if needed
+
+num_moe_experts: 32
+# add more as required
