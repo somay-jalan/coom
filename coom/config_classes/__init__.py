@@ -1,1 +1,1 @@
-from .EKA_DeepSeekV3Config import EKA_DeepSeekV3Config
+from .eka_config import EKAConfig

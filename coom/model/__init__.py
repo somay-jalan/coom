@@ -1,1 +1,1 @@
-from .EKA_DeepSeekV3Model import EKA_DeepSeekV3Model
+from .eka_model import EKAModel
