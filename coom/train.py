@@ -1,7 +1,6 @@
 import os
 import torch
 import importlib
-from omegaconf import OmegaConf
 from nemo import lightning as nl
 from megatron.core.optimizer import OptimizerConfig
 from nemo.collections import llm
