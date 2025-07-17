@@ -1,7 +1,9 @@
-from nemo.collections import llm
+from nemo.collections.llm import DeepSeekModel
 
 
-class EKAModel(llm.DeepSeekModel):
-    pass 
-    # currently there are no new functions or attributes for this class, this is a copy of nemo deepseekV3 model.
-    # However, made this class to add modularity to the code in case in future we want to change something.
+class EKAModel(DeepSeekModel):
+    """
+    Currently identical to NeMo's DeepSeekModel.
+    Defined separately for modularity, to allow future changes or extensions.
+    """
+    pass

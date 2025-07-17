@@ -1,7 +1,9 @@
-from nemo.collections import llm
+from nemo.collections.llm import DeepSeekV3Config
 
 
-class EKAConfig(llm.DeepSeekV3Config):
-    pass 
-    # currently there are no new functions or attributes for this class, this is a copy of nemo deepseekV3 config.
-    # However, made this class to add modularity to the code in case in future we want to change something.
+class EKAConfig(DeepSeekV3Config):
+    """
+    Currently identical to NeMo's DeepSeekV3Config.
+    Defined separately for modularity, to allow future changes or extensions.
+    """
+    pass
