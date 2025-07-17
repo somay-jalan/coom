@@ -3,7 +3,7 @@ config_path_prefix: /
 base_model: EKAModel
 
 base_model_config: EKAConfig
-base_model_configuartion_path: base_model_config.yaml
+base_model_configuration_path: base_model_config.yaml
 
 dataLoader_config_path: dataLoader_config.yaml
 optimizer_config_path: optimizer_config.yaml
