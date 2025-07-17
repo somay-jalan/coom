@@ -1,8 +1,8 @@
-FROM nvcr.io/nvidia/pytorch:23.12-py3
+FROM nvcr.io/nvidia/pytorch:25.06-py3
 
 RUN pip install --upgrade pip setuptools wheel && \
     pip install \
-      pytorch-lightning==1.8.6 \
+      pytorch-lightning \
       omegaconf \
       hydra-core \
       pytest \

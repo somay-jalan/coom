@@ -9,6 +9,10 @@ setup(
     package_dir={'': '.'},
     python_requires='>=3.10',
     install_requires=[
+        'pytorch-lightning',
+        'omegaconf',
+        'hydra-core',
+        'nemo_toolkit[all]',  
     ],
     extras_require={
         'dev': [
