@@ -176,7 +176,7 @@ class Trainer:
         """
         Initialize all components required for training.
         """
-        self.load_configurations()
+        
         self.initialize_model()
         self.initialize_data_module(data_module_type="Mock")
         self.initialize_optimizer()
