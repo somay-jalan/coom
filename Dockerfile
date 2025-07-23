@@ -24,8 +24,6 @@ RUN pip install \
 
 RUN pip install apex
 
-#RUN pip install git+https://github.com/NVIDIA/Megatron-LM.git@114fabee9fdb0e4b1f3d1cfae73e824a3d16fdc4
-
 RUN pip install git+https://github.com/NVIDIA/Megatron-LM
 
 RUN git clone https://github.com/NVIDIA/NeMo.git /workspace/NeMo && \
