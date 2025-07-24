@@ -11,18 +11,20 @@ RUN apt-get update && apt-get install -y \
 
 RUN pip install --upgrade pip setuptools wheel
 
-RUN pip install Cython packaging
+RUN pip install \
+    Cython==3.0.8 \
+    packaging==23.2
 
 RUN pip install \
-    pytorch-lightning \
-    omegaconf \
-    hydra-core \
-    pytest \
-    black \
-    isort \
-    flake8
+    pytorch-lightning==2.5.2 \
+    omegaconf==2.3.0 \
+    hydra-core==1.3.2 \
+    pytest==8.1.1 \
+    black==24.3.0 \
+    isort==5.13.2 \
+    flake8==7.0.0
 
-RUN pip install apex
+RUN pip install apex==0.1
 
 RUN pip install git+https://github.com/NVIDIA/Megatron-LM
 
@@ -37,13 +39,11 @@ RUN pip install git+https://github.com/NVIDIA-NeMo/Run.git
 
 RUN git clone https://github.com/NVIDIA/TransformerEngine.git && \
     cd TransformerEngine && \
+    git checkout release_v2.6 && \
     git submodule update --init --recursive && \
-    NVTE_FRAMEWORK=pytorch \
-    NVTE_WITH_USERBUFFERS=1 \
-    pip install .
+    NVTE_FRAMEWORK=pytorch NVTE_WITH_USERBUFFERS=1 pip install .
 
-    
-RUN pip install bitsandbytes
+RUN pip install bitsandbytes==0.46.0
 
 COPY . /workspace
 
