@@ -1,0 +1,7 @@
+defaults:
+  - /base_configs/logger_config.yaml@_here_
+  - _self_
+# make sure _self_ is in the end as it means to inherent last from this file meaning overwriting the inhereted values if needed
+
+log_dir: "test_logdir/experiment_0/"
+# add more as required

@@ -32,6 +32,8 @@ This framework is planned to support state-of-the-art innovations essential for 
 ## Collaboration and Contribution
 We welcome researchers and developers to contribute to the ongoing development of COOM Training Framework. Regular updates, comprehensive documentation, and open-source contributions are encouraged to foster community-driven improvements.
 
+To ensure consistency and maintain code quality, all code contributions must **strictly follow [PEP 8](https://peps.python.org/pep-0008/)**. 
+
 For more details or to get involved, please contact our team.
 
 ---

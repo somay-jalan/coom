@@ -1,0 +1,11 @@
+defaults:
+  - /base_configs/trainer_config.yaml@_here_
+  - _self_
+# make sure _self_ is in the end as it means to inherent last from this file meaning overwriting the inhereted values if needed
+#CHANGE THE ARGUMENTS BELOW
+
+max_steps: 100
+
+strategy:
+  pipeline_model_parallel_size: 2
+# add more as required
