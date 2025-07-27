@@ -8,7 +8,7 @@ from nemo import lightning as nl
 from nemo.collections import llm
 from omegaconf import DictConfig, OmegaConf
 
-from . import config_classes, model
+from coom import config_classes, model, streaming_datamodule
 
 
 def load_cfg(config_path: str, config_name: str) -> DictConfig:
@@ -100,7 +100,12 @@ class Trainer:
         ModelClass = getattr(model, self.main_cfg["base_model"])
         ConfigClass = getattr(config_classes, self.main_cfg["base_model_config"])
 
-        model_config = ConfigClass(**self.model_cfg)
+        model_config = ConfigClass(
+            **{
+                **self.model_cfg,
+                "seq_length": self.data_cfg["seq_length"],
+                "vocab_size": self.data_cfg["vocab_size"],
+            })
         self.model = ModelClass(model_config)
 
         print(f"Model {self.main_cfg['base_model']} initialized successfully!")
@@ -120,8 +125,15 @@ class Trainer:
                 seq_length=self.data_cfg["seq_length"],
                 global_batch_size=self.data_cfg["global_batch_size"],
             )
-        else:
-            raise NotImplementedError("Only 'Mock' data module is implemented.")
+        elif data_module_type == "Streaming":
+            self.data_module = streaming_datamodule.StreamingPreTrainingDataModule(
+                seq_length=self.data_cfg["seq_length"],
+                micro_batch_size=self.data_cfg["micro_batch_size"],
+                global_batch_size = self.data_cfg["global_batch_size"],
+                num_workers=self.data_cfg["num_workers"],
+                dataset_path="/home/somay/try/dummy_streaming_dataset",
+            )
+            # raise NotImplementedError("Only 'Mock' data module is implemented.")
 
         print("Data module initialized successfully!")
 
@@ -147,6 +159,10 @@ class Trainer:
         strategy = nl.MegatronStrategy(**self.trainer_cfg["strategy"])
 
         self.trainer = nl.Trainer(
+            # num_sanity_val_steps = 0,
+            # limit_val_batches = 2,
+            # accumulate_grad_batches= 4,
+            # num_microbatches = 4,
             devices=self.trainer_cfg["devices"],
             max_steps=self.trainer_cfg["max_steps"],
             accelerator=self.trainer_cfg["accelerator"],
@@ -178,7 +194,7 @@ class Trainer:
         """
         
         self.initialize_model()
-        self.initialize_data_module(data_module_type="Mock")
+        self.initialize_data_module(data_module_type="Streaming")
         self.initialize_optimizer()
         self.initialize_trainer()
         self.initialize_logger()
@@ -217,13 +233,16 @@ class Trainer:
         self.validate_components()
 
         print("Starting training...")
+        # from torch.distributed import is_initialized, get_rank
+        # rank = get_rank() if is_initialized() else 0
+        # self.data_module.data_sampler_mock.setup(rank)
 
         llm.train(
             model=self.model,
             data=self.data_module,
             trainer=self.trainer,
             log=self.logger,
-            tokenizer="data",
+            # tokenizer="data",
             optim=self.optimizer,
         )
 
