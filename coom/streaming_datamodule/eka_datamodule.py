@@ -158,8 +158,12 @@ class StreamingPreTrainingDataModule(pl.LightningDataModule):
             eod_token_id=eod_token_id,
         )
         self.rampup_batch_size = rampup_batch_size
-        # Your MegatronDataSampler would be used by the trainer framework
-        # self.data_sampler = ...
+        self.data_sampler = MegatronDataSampler(
+            seq_len=self.seq_length,
+            micro_batch_size=self.micro_batch_size,
+            global_batch_size=self.global_batch_size,
+            rampup_batch_size=self.rampup_batch_size,
+        )
 
     def setup(self, stage: str = ""):
         # The logic to create unique local paths per rank is good. Keep it.
