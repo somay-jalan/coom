@@ -133,8 +133,8 @@ class StreamingPreTrainingDataModule(pl.LightningDataModule):
     def setup(self, stage: str = ""):
         print("inside setup")
         # Clean shared memory only on rank 0 to avoid race conditions
-        if not dist.is_initialized() or dist.get_rank() == 0:
-            streaming.base.util.clean_stale_shared_memory()
+        # if not dist.is_initialized() or dist.get_rank() == 0:
+        #     streaming.base.util.clean_stale_shared_memory()
             
             # # Also clean up old cache directories to prevent conflicts
             # import glob
@@ -151,8 +151,8 @@ class StreamingPreTrainingDataModule(pl.LightningDataModule):
             #             print(f"Warning: Could not clean {old_dir}: {e}")
         
         # # Synchronize all processes after cleanup
-        if dist.is_initialized():
-            dist.barrier()
+        # if dist.is_initialized():
+        #     dist.barrier()
         
         streaming_batch_size = self.micro_batch_size
         
