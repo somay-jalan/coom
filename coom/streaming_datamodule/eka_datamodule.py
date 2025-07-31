@@ -88,7 +88,9 @@ class NonIterableStreamingDataset(torch.utils.data.Dataset):
             # Create a file lock that is shared across all workers for this dataset.
             # Timeout is important to prevent indefinite hangs.
             os.makedirs(os.path.dirname(self.lock_path), exist_ok=True)
+            print("Before lock")
             self.lock = FileLock(self.lock_path, timeout=120)
+            print("After lock")
 
         # Each worker gets its own iterator. StreamingDataset's __iter__ is designed
         # to coordinate these workers using its own internal barriers.
@@ -123,6 +125,8 @@ def _streaming_worker_init_fn(worker_id: int):
     Worker init function to properly initialize the NonIterableStreamingDataset.
     """
     worker_info = get_worker_info()
+    print("STEAMING WORKER INIT FN")
+    print(worker_info)
     if worker_info is not None:
         dataset = worker_info.dataset
         if isinstance(dataset, NonIterableStreamingDataset):
