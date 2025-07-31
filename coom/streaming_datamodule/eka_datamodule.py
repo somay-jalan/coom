@@ -61,35 +61,32 @@ class NonIterableStreamingDataset(torch.utils.data.Dataset):
         self.streaming_dataset = streaming_dataset
         self._estimated_length = estimated_length
         self.iterator = None
+        self._worker_iterator = None
     
     def __len__(self):
         return self._estimated_length
     
     def __getitem__(self, idx):
-            # Initialize worker-specific iterator on first access
-            if not hasattr(self, '_worker_iterator'):
-                self._worker_iterator = iter(self.streaming_dataset)
-
-            try:
-                return next(self._worker_iterator)
-            except StopIteration:
-                # Reset iterator if dataset is exhausted
-                self._worker_iterator = iter(self.streaming_dataset)
-                return next(self._worker_iterator)
-    
-    def initialize_iterator(self):
-            # Optional, in case you want to explicitly reset from worker_init_fn
+        # Lazily init or reset iterator
+        if self._worker_iterator is None:
             self._worker_iterator = iter(self.streaming_dataset)
+        try:
+            return next(self._worker_iterator)
+        except StopIteration:
+            self._worker_iterator = iter(self.streaming_dataset)
+            return next(self._worker_iterator)
+    
+    def reset_iterator(self):
+        self._worker_iterator = None
 
 def _streaming_worker_init_fn(worker_id: int):
     """
     Worker init function for StreamingDataset in a map-style wrapper.
     """
     worker_info = get_worker_info()
-    if worker_info is not None:
-        dataset = worker_info.dataset
-        if isinstance(dataset, NonIterableStreamingDataset):
-            dataset.initialize_iterator()
+    dataset = worker_info.dataset
+    if hasattr(dataset, "reset_iterator"):
+        dataset.reset_iterator()
 
 class StreamingPreTrainingDataModule(pl.LightningDataModule):
     """
@@ -208,7 +205,7 @@ class StreamingPreTrainingDataModule(pl.LightningDataModule):
             dataset=self._train_ds,
             num_workers=self.num_workers,
             collate_fn=self.collator,
-            pin_memory=True,
+            # pin_memory=True,
             persistent_workers=True if self.num_workers > 0 else False,
             worker_init_fn=_streaming_worker_init_fn,
         )
@@ -221,7 +218,7 @@ class StreamingPreTrainingDataModule(pl.LightningDataModule):
             dataset=self._validation_ds,
             num_workers=self.num_workers,
             collate_fn=self.collator,
-            pin_memory=True,
+            # pin_memory=True,
             persistent_workers=True if self.num_workers > 0 else False,
             worker_init_fn=_streaming_worker_init_fn,
         )
