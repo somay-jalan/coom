@@ -208,7 +208,7 @@ class StreamingPreTrainingDataModule(pl.LightningDataModule):
 
         dl_batch_size = self.micro_batch_size * 2
         
-        return StreamingDataLoader(
+        self._train_dataloader = StreamingDataLoader(
             dataset=self._train_ds,
             batch_size=dl_batch_size,
             num_workers=self.num_workers,
@@ -217,10 +217,11 @@ class StreamingPreTrainingDataModule(pl.LightningDataModule):
             persistent_workers=True if self.num_workers > 0 else False,
             worker_init_fn=_streaming_worker_init_fn, # IMPORTANT
         )
+        return self._train_dataloader
 
     def val_dataloader(self) -> StreamingDataLoader:
         dl_batch_size = self.micro_batch_size * 2
-        return StreamingDataLoader(
+         self._val_dataloader = StreamingDataLoader(
             dataset=self._validation_ds,
             batch_size=dl_batch_size,
             num_workers=self.num_workers,
@@ -229,6 +230,7 @@ class StreamingPreTrainingDataModule(pl.LightningDataModule):
             persistent_workers=True if self.num_workers > 0 else False,
             worker_init_fn=_streaming_worker_init_fn, # IMPORTANT
         )
+        return self._val_dataloader
 
 
     def state_dict(self):
