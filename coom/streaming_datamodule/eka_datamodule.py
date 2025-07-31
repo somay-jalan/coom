@@ -221,7 +221,7 @@ class StreamingPreTrainingDataModule(pl.LightningDataModule):
 
     def val_dataloader(self) -> StreamingDataLoader:
         dl_batch_size = self.micro_batch_size * 2
-         self._val_dataloader = StreamingDataLoader(
+        self._val_dataloader = StreamingDataLoader(
             dataset=self._validation_ds,
             batch_size=dl_batch_size,
             num_workers=self.num_workers,
