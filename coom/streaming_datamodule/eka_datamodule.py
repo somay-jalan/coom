@@ -174,8 +174,12 @@ class StreamingPreTrainingDataModule(pl.LightningDataModule):
         # However, it's better to let StreamingDataset handle this internally if possible.
         # For simplicity, we'll keep your existing path logic.
         rank = dist.get_rank() if dist.is_initialized() else 0
-        train_local_path = f"{self.dataset_path}/train_rank_{rank}"
-        val_local_path = f"{self.dataset_path}/val_rank_{rank}"
+        import time
+        timestamp = int(time.time())
+        process_id = os.getpid()
+        
+        train_local_path = f"{self.dataset_path}/train_rank_{rank}_pid_{process_id}_{timestamp}"
+        val_local_path = f"{self.dataset_path}/val_rank_{rank}_pid_{process_id}_{timestamp}
         os.makedirs(train_local_path, exist_ok=True)
         os.makedirs(val_local_path, exist_ok=True)
 
