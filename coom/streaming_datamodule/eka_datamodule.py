@@ -179,7 +179,7 @@ class StreamingPreTrainingDataModule(pl.LightningDataModule):
         process_id = os.getpid()
         
         train_local_path = f"{self.dataset_path}/train_rank_{rank}_pid_{process_id}_{timestamp}"
-        val_local_path = f"{self.dataset_path}/val_rank_{rank}_pid_{process_id}_{timestamp}
+        val_local_path = f"{self.dataset_path}/val_rank_{rank}_pid_{process_id}_{timestamp}"
         os.makedirs(train_local_path, exist_ok=True)
         os.makedirs(val_local_path, exist_ok=True)
 
