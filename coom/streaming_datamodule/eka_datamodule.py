@@ -133,8 +133,8 @@ class StreamingPreTrainingDataModule(pl.LightningDataModule):
     def setup(self, stage: str = ""):
         print("inside setup")
         # Clean shared memory only on rank 0 to avoid race conditions
-        # if not dist.is_initialized() or dist.get_rank() == 0:
-        #     streaming.base.util.clean_stale_shared_memory()
+        if not dist.is_initialized() or dist.get_rank() == 0:
+            streaming.base.util.clean_stale_shared_memory()
             
             # # Also clean up old cache directories to prevent conflicts
             # import glob
@@ -151,8 +151,8 @@ class StreamingPreTrainingDataModule(pl.LightningDataModule):
             #             print(f"Warning: Could not clean {old_dir}: {e}")
         
         # # Synchronize all processes after cleanup
-        # if dist.is_initialized():
-        #     dist.barrier()
+        if dist.is_initialized():
+            dist.barrier()
         
         streaming_batch_size = self.micro_batch_size
         
@@ -205,8 +205,8 @@ class StreamingPreTrainingDataModule(pl.LightningDataModule):
             dataset=self._train_ds,
             num_workers=self.num_workers,
             collate_fn=self.collator,
-            # pin_memory=True,
-            # persistent_workers=False,
+            pin_memory=True,
+            persistent_workers=True if self.num_workers > 0 else False,
             worker_init_fn=_streaming_worker_init_fn,
         )
         
@@ -218,8 +218,8 @@ class StreamingPreTrainingDataModule(pl.LightningDataModule):
             dataset=self._validation_ds,
             num_workers=self.num_workers,
             collate_fn=self.collator,
-            # pin_memory=True,
-            # persistent_workers=False,
+            pin_memory=True,
+            persistent_workers=True if self.num_workers > 0 else False,
             worker_init_fn=_streaming_worker_init_fn,
         )
         
@@ -235,3 +235,6 @@ class StreamingPreTrainingDataModule(pl.LightningDataModule):
     
     def load_state_dict(self, state_dict):
         self._train_dataloader.load_state_dict(state_dict)
+    def on_train_epoch_start(self):
+        if hasattr(self.trainer.datamodule._train_ds, "reset_iterator"):
+            self.trainer.datamodule._train_ds.reset_iterator()
