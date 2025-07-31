@@ -204,16 +204,11 @@ class StreamingPreTrainingDataModule(pl.LightningDataModule):
             # be saved by the Trainer/Callback which has this info.
             self._train_ds.streaming_dataset.load_state_dict(self._streaming_state)
 
-    def train_dataloader(self) -> DataLoader:
-        # CRITICAL: Use a standard torch.utils.data.DataLoader.
-        # Do NOT use StreamingDataLoader with a map-style dataset.
-        
-        # The DataLoader batch_size determines how many items (from __getitem__)
-        # are passed to the collate_fn. Let's provide enough to build a microbatch.
-        # A safe bet is a bit more than the micro_batch_size.
+    def train_dataloader(self) -> StreamingDataLoader:
+
         dl_batch_size = self.micro_batch_size * 2
         
-        return DataLoader(
+        return StreamingDataLoader(
             dataset=self._train_ds,
             batch_size=dl_batch_size,
             num_workers=self.num_workers,
@@ -223,9 +218,9 @@ class StreamingPreTrainingDataModule(pl.LightningDataModule):
             worker_init_fn=_streaming_worker_init_fn, # IMPORTANT
         )
 
-    def val_dataloader(self) -> DataLoader:
+    def val_dataloader(self) -> StreamingDataLoader:
         dl_batch_size = self.micro_batch_size * 2
-        return DataLoader(
+        return StreamingDataLoader(
             dataset=self._validation_ds,
             batch_size=dl_batch_size,
             num_workers=self.num_workers,
@@ -235,23 +230,13 @@ class StreamingPreTrainingDataModule(pl.LightningDataModule):
             worker_init_fn=_streaming_worker_init_fn, # IMPORTANT
         )
 
-    # NOTE: state_dict and load_state_dict for a DataModule are complex.
-    # Lightning doesn't have a standard hook for saving dataloader state that provides
-    # the number of samples processed. This usually requires a custom Callback.
-    # The methods below show the *intent*. You will need a mechanism to get `num_samples_processed`.
 
-    def state_dict(self, num_samples_processed: int) -> dict:
-        """
-        Creates the state dict. This needs to be called from a callback
-        that has access to the number of samples processed in the epoch.
-        """
-        if self._train_ds:
-            return self._train_ds.streaming_dataset.state_dict(num_samples=num_samples_processed, from_beginning=False)
+    def state_dict(self):
+        if hasattr(self._train_ds, 'streaming_dataset'):
+            return self._train_dataloader.state_dict()
+        elif hasattr(self._train_ds, 'state_dict'):
+            return self._train_ds.state_dict()
         return {}
 
-    def load_state_dict(self, state_dict: dict):
-        """
-        Loads the state dict. Called before setup().
-        """
-        if state_dict:
-            self._streaming_state = state_dict
+    def load_state_dict(self, state_dict):
+        self._train_dataloader.load_state_dict(state_dict)
