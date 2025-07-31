@@ -203,7 +203,7 @@ class StreamingPreTrainingDataModule(pl.LightningDataModule):
     def train_dataloader(self) -> StreamingDataLoader:
         self._train_dataloader = StreamingDataLoader(
             dataset=self._train_ds,
-            num_workers=0,
+            num_workers=self.num_workers,
             collate_fn=self.collator,
             # pin_memory=True,
             # persistent_workers=True if self.num_workers > 0 else False,
@@ -216,7 +216,7 @@ class StreamingPreTrainingDataModule(pl.LightningDataModule):
     def val_dataloader(self) -> StreamingDataLoader:
         self._val_dataloader = StreamingDataLoader(
             dataset=self._validation_ds,
-            num_workers=0,
+            num_workers=self.num_workers,
             collate_fn=self.collator,
             # pin_memory=True,
             # persistent_workers=True if self.num_workers > 0 else False,
