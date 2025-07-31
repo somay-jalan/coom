@@ -167,7 +167,7 @@ class Trainer:
             max_steps=self.trainer_cfg["max_steps"],
             accelerator=self.trainer_cfg["accelerator"],
             strategy=strategy,
-            # plugins=nl.MegatronMixedPrecision(precision=self.trainer_cfg["precision"]),
+            plugins=nl.MegatronMixedPrecision(precision="16-mixed"),
         )
 
         print("Trainer initialized successfully!")
