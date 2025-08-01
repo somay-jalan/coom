@@ -205,8 +205,8 @@ class StreamingPreTrainingDataModule(pl.LightningDataModule):
             dataset=self._train_ds,
             num_workers=self.num_workers,
             collate_fn=self.collator,
-            # pin_memory=True,
-            # persistent_workers=True if self.num_workers > 0 else False,
+            pin_memory=True,
+            persistent_workers=True if self.num_workers > 0 else False,
             worker_init_fn=_streaming_worker_init_fn,
         )
         
@@ -218,8 +218,8 @@ class StreamingPreTrainingDataModule(pl.LightningDataModule):
             dataset=self._validation_ds,
             num_workers=self.num_workers,
             collate_fn=self.collator,
-            # pin_memory=True,
-            # persistent_workers=True if self.num_workers > 0 else False,
+            pin_memory=True,
+            persistent_workers=True if self.num_workers > 0 else False,
             worker_init_fn=_streaming_worker_init_fn,
         )
         
