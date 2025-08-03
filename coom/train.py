@@ -8,7 +8,8 @@ from nemo import lightning as nl
 from nemo.collections import llm
 from omegaconf import DictConfig, OmegaConf
 
-from coom import config_classes, model, streaming_datamodule
+from coom import config_classes, model
+
 
 
 def load_cfg(config_path: str, config_name: str) -> DictConfig:
@@ -126,12 +127,22 @@ class Trainer:
                 global_batch_size=self.data_cfg["global_batch_size"],
             )
         elif data_module_type == "Streaming":
-            self.data_module = streaming_datamodule.StreamingPreTrainingDataModule(
+            # self.data_module = streaming_datamodule.StreamingPreTrainingDataModule(
+            #     seq_length=self.data_cfg["seq_length"],
+            #     micro_batch_size=self.data_cfg["micro_batch_size"],
+            #     global_batch_size = self.data_cfg["global_batch_size"],
+            #     num_workers=self.data_cfg["num_workers"],
+            #     dataset_path="/home/somay/try/dummy_streaming_dataset",
+            # )
+            self.data_module = llm.PreTrainingDataModule(
+                paths=["msc://my_test_data/my_test_data_text_document"],
                 seq_length=self.data_cfg["seq_length"],
                 micro_batch_size=self.data_cfg["micro_batch_size"],
-                global_batch_size = self.data_cfg["global_batch_size"],
-                num_workers=self.data_cfg["num_workers"],
-                dataset_path="/home/somay/try/dummy_streaming_dataset",
+                global_batch_size=self.data_cfg["global_batch_size"],
+                object_storage_cache_path = "/home/shadeform/aistore",
+                mmap_bin_files = False
+                # dataset_kwargs={},
+                # split="95,3,2"
             )
             # raise NotImplementedError("Only 'Mock' data module is implemented.")
 
@@ -168,6 +179,7 @@ class Trainer:
             accelerator=self.trainer_cfg["accelerator"],
             strategy=strategy,
             plugins=nl.MegatronMixedPrecision(precision="16-mixed"),
+            limit_val_batches=0,
         )
 
         print("Trainer initialized successfully!")
