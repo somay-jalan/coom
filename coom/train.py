@@ -135,11 +135,12 @@ class Trainer:
             #     dataset_path="/home/somay/try/dummy_streaming_dataset",
             # )
             self.data_module = llm.PreTrainingDataModule(
-                paths=["msc://my_test_data/my_test_data_text_document"],
+                # paths=["/home/shadeform/coom/trial_data_text_document"],
+                paths=["msc://my_test_data/my-gpt_text_document"],
                 seq_length=self.data_cfg["seq_length"],
                 micro_batch_size=self.data_cfg["micro_batch_size"],
                 global_batch_size=self.data_cfg["global_batch_size"],
-                object_storage_cache_path = "/home/shadeform/aistore",
+                object_storage_cache_path = "/home/shadeform/oject_storage_cache",
                 mmap_bin_files = False
                 # dataset_kwargs={},
                 # split="95,3,2"
