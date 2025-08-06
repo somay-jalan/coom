@@ -8,7 +8,7 @@ from nemo import lightning as nl
 from nemo.collections import llm
 from omegaconf import DictConfig, OmegaConf
 
-from coom import config_classes, model
+from coom import config_classes, model, data_module
 
 
 
@@ -126,26 +126,19 @@ class Trainer:
                 seq_length=self.data_cfg["seq_length"],
                 global_batch_size=self.data_cfg["global_batch_size"],
             )
-        elif data_module_type == "Streaming":
-            # self.data_module = streaming_datamodule.StreamingPreTrainingDataModule(
-            #     seq_length=self.data_cfg["seq_length"],
-            #     micro_batch_size=self.data_cfg["micro_batch_size"],
-            #     global_batch_size = self.data_cfg["global_batch_size"],
-            #     num_workers=self.data_cfg["num_workers"],
-            #     dataset_path="/home/somay/try/dummy_streaming_dataset",
-            # )
-            self.data_module = llm.PreTrainingDataModule(
+        elif data_module_type == "Real":
+            if self.data_cfg["streaming"]:
+                os.environ["MSC_CONFIG"] = self.data_cfg["msc_config"]
+            DataModuleClass = getattr(data_module, self.main_cfg["data_model"])
+            self.data_module = DataModuleClass(
                 # paths=["/home/shadeform/coom/trial_data_text_document"],
-                paths=["msc://my_test_data/my-gpt_text_document"],
+                paths=self.data_cfg["data_paths"],
                 seq_length=self.data_cfg["seq_length"],
                 micro_batch_size=self.data_cfg["micro_batch_size"],
                 global_batch_size=self.data_cfg["global_batch_size"],
-                object_storage_cache_path = "/home/shadeform/oject_storage_cache",
-                mmap_bin_files = False
-                # dataset_kwargs={},
-                # split="95,3,2"
+                object_storage_cache_path = self.data_cfg["object_storage_cache_path"],
+                mmap_bin_files = not(self.data_cfg["streaming"]) # basically True if not streaming otherwise false
             )
-            # raise NotImplementedError("Only 'Mock' data module is implemented.")
 
         print("Data module initialized successfully!")
 
@@ -207,7 +200,7 @@ class Trainer:
         """
         
         self.initialize_model()
-        self.initialize_data_module(data_module_type="Streaming")
+        self.initialize_data_module(data_module_type=self.data_cfg["dataModuleType"])
         self.initialize_optimizer()
         self.initialize_trainer()
         self.initialize_logger()
