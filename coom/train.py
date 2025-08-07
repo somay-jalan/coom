@@ -175,8 +175,8 @@ class Trainer:
             max_steps=self.trainer_cfg["max_steps"],
             accelerator=self.trainer_cfg["accelerator"],
             strategy=strategy,
-            profiler=profiler
-            profiler=profiler
+            profiler=profiler,
+            profiler=profiler, 
             limit_val_batches=0,
         )
 
