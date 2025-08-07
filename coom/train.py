@@ -176,7 +176,7 @@ class Trainer:
             accelerator=self.trainer_cfg["accelerator"],
             strategy=strategy,
             profiler=profiler,
-            profiler=profiler, 
+            plugins=nl.MegatronMixedPrecision(precision=self.trainer_cfg["precision"]),
             limit_val_batches=0,
         )
 
