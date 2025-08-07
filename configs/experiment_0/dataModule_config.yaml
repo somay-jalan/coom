@@ -8,5 +8,6 @@ global_batch_size: 32
 dataModuleType : Real # can  be Mock or Real as of now.
 msc_config : "/home/shadeform/coom/configs/experiment_0/msc_config_aistore.yaml"
 data_paths : ["msc://my_test_data/my-gpt_text_document"]
+# data_paths : ["/home/shadeform/test_data/my-gpt_text_document"]
 object_storage_cache_path : "/home/shadeform/oject_storage_cache"
 streaming : True # has to True or False

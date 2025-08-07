@@ -15,6 +15,5 @@ def pytorch_profiler(experiment_name: str, sub_experiment_name: Optional[str] = 
     kwargs.setdefault("filename", "profile")
     kwargs.setdefault("export_to_tensorboard", True)
     kwargs.setdefault("export_to_chrome", True) 
-    kwargs.setdefault("on_trace_ready", tensorboard_trace_handler(profiler_dir))
 
     return PyTorchProfiler(**kwargs)
