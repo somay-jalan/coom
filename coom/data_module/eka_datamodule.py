@@ -33,8 +33,8 @@ def eka_validate_dataset_asset_accessibility(paths):
                 msc = pre_training.import_multistorageclient()
                 path = msc.Path(file_path)
             return
-        except:
-            raise FileNotFoundError(f"Expected {str(file_path)} to exist in the msc bucket..")
+        except Exception as e:
+            raise e
     else:
         path = Path(paths)
 
