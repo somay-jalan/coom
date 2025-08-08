@@ -1,0 +1,18 @@
+
+schedule:
+  # Number of steps to wait before starting profiling
+  wait: 5
+  
+  # Number of warmup steps (profiler is active but not recording)
+  warmup: 2
+  
+  # Number of active profiling steps (actual recording happens)
+  active: 10
+  
+
+
+
+# Export options
+export_to_chrome: true
+export_to_tensorboard: true
+

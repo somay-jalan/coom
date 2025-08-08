@@ -62,6 +62,7 @@ class Trainer:
         self.opt_cfg = None
         self.trainer_cfg = None
         self.logger_cfg = None
+        self.profiler_cfg = None
 
         # Component containers
         self.model = None
@@ -92,6 +93,12 @@ class Trainer:
         self.opt_cfg = load_cfg(self.config_base_path, full_path("optimizer_config_path"))[self.experiment_name]
         self.trainer_cfg = load_cfg(self.config_base_path, full_path("trainer_config_path"))[self.experiment_name]
         self.logger_cfg = load_cfg(self.config_base_path, full_path("logger_config_path"))[self.experiment_name]
+        
+        # Load profiler configuration if profiler is enabled
+        if self.enable_profiler and "profiler_config_path" in self.main_cfg:
+            self.profiler_cfg = load_cfg(self.config_base_path, full_path("profiler_config_path"))[self.experiment_name]
+        else:
+            self.profiler_cfg = None
 
         print("All configurations loaded successfully!")
 
@@ -106,15 +113,23 @@ class Trainer:
 
         # Command to visualise profiles:
         # tensorboard --logdir=profiler_logs
+        
+        print("Initializing profiler with configuration...")
+        
+        # Use the loaded profiler configuration
+        profiler_kwargs = {}
+        if self.profiler_cfg:
+            # Pass the profiler config directly to the profiler function
+            profiler_kwargs['profiler_config'] = self.profiler_cfg
+        else:
+            print("No profiler configuration found in main_cfg. Using default settings.")
+        
         self.profiler = profiler.pytorch_profiler(
             experiment_name=self.experiment_name,
             sub_experiment_name=self.sub_experiment_name,
-            export_to_chrome=True,
-            export_to_tensorboard=True,
-            nvtx_emit=True
+            **profiler_kwargs
         )
 
-        print("Profiler initialized successfully!")
 
     def initialize_model(self):
         """
