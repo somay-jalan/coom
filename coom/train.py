@@ -8,7 +8,7 @@ from nemo import lightning as nl
 from nemo.collections import llm
 from omegaconf import DictConfig, OmegaConf
 
-from coom import config_classes, model, data_module
+from coom import config_classes, model, data_module, profiler
 
 
 def load_cfg(config_path: str, config_name: str) -> DictConfig:
@@ -37,7 +37,7 @@ class Trainer:
     and orchestrating the training process.
     """
 
-    def __init__(self, experiment_name, sub_experiment_name, use_wandb=False, profiler=None, profiler_summary=False):
+    def __init__(self, experiment_name, sub_experiment_name, use_wandb=False, enable_profiler=False, profiler_summary=False):
         """
         Initialize the Trainer with experiment and sub-experiment names.
 
@@ -45,12 +45,14 @@ class Trainer:
             experiment_name (str): Name of the experiment.
             sub_experiment_name (str): Name of the sub-experiment.
             use_wandb (bool): Whether to use Weights & Biases logging.
+            enable_profiler (bool): Whether to enable profiling.
+            profiler_summary (bool): Whether to display profiler summary.
         """
         self.experiment_name = experiment_name
         self.sub_experiment_name = sub_experiment_name
         self.config_base_path = "./../coom/configs"
         self.use_wandb = use_wandb  # Will be used in the future.
-        self.profiler = profiler
+        self.enable_profiler = enable_profiler
         self.profiler_summary = profiler_summary
 
         # Configuration containers
@@ -67,6 +69,7 @@ class Trainer:
         self.trainer = None
         self.logger = None
         self.optimizer = None
+        self.profiler = None
 
         self.load_configurations()
 
@@ -91,6 +94,27 @@ class Trainer:
         self.logger_cfg = load_cfg(self.config_base_path, full_path("logger_config_path"))[self.experiment_name]
 
         print("All configurations loaded successfully!")
+
+    def initialize_profiler(self):
+        """
+        Initialize the profiler based on configuration.
+        """
+        if not self.enable_profiler:
+            self.profiler = None
+            print("Profiler disabled.")
+            return
+
+        # Command to visualise profiles:
+        # tensorboard --logdir=profiler_logs
+        self.profiler = profiler.pytorch_profiler(
+            experiment_name=self.experiment_name,
+            sub_experiment_name=self.sub_experiment_name,
+            export_to_chrome=True,
+            export_to_tensorboard=True,
+            nvtx_emit=True
+        )
+
+        print("Profiler initialized successfully!")
 
     def initialize_model(self):
         """
@@ -164,8 +188,6 @@ class Trainer:
 
         strategy = nl.MegatronStrategy(**self.trainer_cfg["strategy"])
 
-        profiler = self.profiler
-
         self.trainer = nl.Trainer(
             # num_sanity_val_steps = 0,
             # limit_val_batches = 2,
@@ -175,7 +197,7 @@ class Trainer:
             max_steps=self.trainer_cfg["max_steps"],
             accelerator=self.trainer_cfg["accelerator"],
             strategy=strategy,
-            profiler=profiler,
+            profiler=self.profiler,
             plugins=nl.MegatronMixedPrecision(precision=self.trainer_cfg["precision"]),
             limit_val_batches=0,
         )
@@ -203,6 +225,7 @@ class Trainer:
         Initialize all components required for training.
         """
         
+        self.initialize_profiler()
         self.initialize_model()
         self.initialize_data_module(data_module_type=self.data_cfg["dataModuleType"])
         self.initialize_optimizer()
