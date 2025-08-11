@@ -171,7 +171,6 @@ class Trainer:
                 os.environ["MSC_CONFIG"] = self.data_cfg["msc_config"]
             DataModuleClass = getattr(data_module, self.main_cfg["data_model"])
             self.data_module = DataModuleClass(
-                # paths=["/home/shadeform/coom/trial_data_text_document"],
                 paths=self.data_cfg["data_paths"],
                 seq_length=self.data_cfg["seq_length"],
                 micro_batch_size=self.data_cfg["micro_batch_size"],
@@ -204,10 +203,6 @@ class Trainer:
         strategy = nl.MegatronStrategy(**self.trainer_cfg["strategy"])
 
         self.trainer = nl.Trainer(
-            # num_sanity_val_steps = 0,
-            # limit_val_batches = 2,
-            # accumulate_grad_batches= 4,
-            # num_microbatches = 4,
             devices=self.trainer_cfg["devices"],
             max_steps=self.trainer_cfg["max_steps"],
             accelerator=self.trainer_cfg["accelerator"],
@@ -281,9 +276,7 @@ class Trainer:
         self.validate_components()
 
         print("Starting training...")
-        # from torch.distributed import is_initialized, get_rank
-        # rank = get_rank() if is_initialized() else 0
-        # self.data_module.data_sampler_mock.setup(rank)
+
 
         llm.train(
             model=self.model,
