@@ -102,23 +102,20 @@ class Trainer:
             print("Profiler disabled.")
             return
 
-        # Command to visualise profiles:
-        # tensorboard --logdir=profiler_logs
         
         print("Initializing profiler with configuration...")
         
-        # Use the loaded profiler configuration
-        profiler_kwargs = {}
-        if self.profiler_cfg:
-            # Pass the profiler config directly to the profiler function
-            profiler_kwargs['profiler_config'] = self.profiler_cfg
+        if self.sub_experiment_name is not None:
+            profiler_dir = os.path.join("profiler_logs", self.experiment_name, self.sub_experiment_name)
         else:
-            print("No profiler configuration found in main_cfg. Using default settings.")
+            profiler_dir = os.path.join("profiler_logs", self.experiment_name)
         
-        self.profiler = profiler.pytorch_profiler(
-            experiment_name=self.experiment_name,
-            sub_experiment_name=self.sub_experiment_name,
-            **profiler_kwargs
+        self.profiler = profiler.EKAProfiler(
+            start_step = self.profiler_cfg["start_step"],
+            end_step = self.profiler_cfg["end_step"],
+            warmup_steps = self.profiler_cfg["warmup_steps"],
+            active_steps = self.profiler_cfg["active_steps"],
+            trace_dir = profiler_dir
         )
 
 
@@ -193,12 +190,16 @@ class Trainer:
 
         strategy = nl.MegatronStrategy(**self.trainer_cfg["strategy"])
 
+        callbacks = []
+        if self.profiler is not None:
+            callbacks.append(self.profiler)
+
         self.trainer = nl.Trainer(
             devices=self.trainer_cfg["devices"],
             max_steps=self.trainer_cfg["max_steps"],
             accelerator=self.trainer_cfg["accelerator"],
             strategy=strategy,
-            profiler=self.profiler,
+            callbacks=callbacks,
             plugins=nl.MegatronMixedPrecision(precision=self.trainer_cfg["precision"]),
             limit_val_batches=0,
         )
