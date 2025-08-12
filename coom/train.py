@@ -37,7 +37,7 @@ class Trainer:
     and orchestrating the training process.
     """
 
-    def __init__(self, experiment_name, sub_experiment_name, use_wandb=False, enable_profiler=False, profiler_summary=False):
+    def __init__(self, experiment_name, sub_experiment_name, use_wandb=False):
         """
         Initialize the Trainer with experiment and sub-experiment names.
 
@@ -45,15 +45,11 @@ class Trainer:
             experiment_name (str): Name of the experiment.
             sub_experiment_name (str): Name of the sub-experiment.
             use_wandb (bool): Whether to use Weights & Biases logging.
-            enable_profiler (bool): Whether to enable profiling.
-            profiler_summary (bool): Whether to display profiler summary.
         """
         self.experiment_name = experiment_name
         self.sub_experiment_name = sub_experiment_name
         self.config_base_path = "./../coom/configs"
         self.use_wandb = use_wandb  # Will be used in the future.
-        self.enable_profiler = enable_profiler
-        self.profiler_summary = profiler_summary
 
         # Configuration containers
         self.main_cfg = None
@@ -93,12 +89,7 @@ class Trainer:
         self.opt_cfg = load_cfg(self.config_base_path, full_path("optimizer_config_path"))[self.experiment_name]
         self.trainer_cfg = load_cfg(self.config_base_path, full_path("trainer_config_path"))[self.experiment_name]
         self.logger_cfg = load_cfg(self.config_base_path, full_path("logger_config_path"))[self.experiment_name]
-        
-        # Load profiler configuration if profiler is enabled
-        if self.enable_profiler and "profiler_config_path" in self.main_cfg:
-            self.profiler_cfg = load_cfg(self.config_base_path, full_path("profiler_config_path"))[self.experiment_name]
-        else:
-            self.profiler_cfg = None
+        self.profiler_cfg = load_cfg(self.config_base_path, full_path("profiler_config_path"))[self.experiment_name]
 
         print("All configurations loaded successfully!")
 
@@ -106,7 +97,7 @@ class Trainer:
         """
         Initialize the profiler based on configuration.
         """
-        if not self.enable_profiler:
+        if not self.profiler_cfg["enable_profiler"]:
             self.profiler = None
             print("Profiler disabled.")
             return
@@ -295,9 +286,6 @@ class Trainer:
         """
         self.initialize_all_components()
         self.start_training()
-        if self.trainer and self.trainer.profiler and self.profiler_summary:
-            print("\n=== Profiler Summary ===")
-            print(self.trainer.profiler.summary())
 
     def get_config_summary(self):
         """

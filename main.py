@@ -14,8 +14,6 @@ def main():
     trainer = Trainer(
         experiment_name=experiment_name,
         sub_experiment_name=sub_experiment_name,
-        enable_profiler=True,
-        profiler_summary=True,
     )
 
     trainer.train()

@@ -1,4 +1,4 @@
-
+enable_profiler : True
 schedule:
   # Number of steps to wait before starting profiling
   wait: 5
