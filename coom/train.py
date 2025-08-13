@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import importlib
 
 from hydra import compose, initialize_config_dir
 # from lightning.pytorch.loggers import WandbLogger
@@ -59,6 +60,7 @@ class Trainer:
         self.trainer_cfg = None
         self.logger_cfg = None
         self.profiler_cfg = None
+        self.callback_cfg = None
 
         # Component containers
         self.model = None
@@ -67,6 +69,7 @@ class Trainer:
         self.logger = None
         self.optimizer = None
         self.profiler = None
+        self.callbacks = []
 
         self.load_configurations()
 
@@ -90,8 +93,76 @@ class Trainer:
         self.trainer_cfg = load_cfg(self.config_base_path, full_path("trainer_config_path"))[self.experiment_name]
         self.logger_cfg = load_cfg(self.config_base_path, full_path("logger_config_path"))[self.experiment_name]
         self.profiler_cfg = load_cfg(self.config_base_path, full_path("profiler_config_path"))[self.experiment_name]
+        
+        # Load callback configuration if specified
+        if "callback_config_path" in self.main_cfg:
+            self.callback_cfg = load_cfg(self.config_base_path, full_path("callback_config_path"))[self.experiment_name]
 
         print("All configurations loaded successfully!")
+
+    def initialize_callbacks(self):
+        """
+        Initialize callbacks based on the callback configuration.
+        
+        Expected callback_cfg structure:
+        {
+            "callbacks": [
+                {
+                    "class_name": "ModelCheckpoint",
+                    "module_path": "nemo.lightning.pytorch.callbacks",
+                    "parameters": {
+                        "dirpath": "checkpoints/",
+                        "filename": "{epoch}-{step}",
+                        "save_top_k": 3,
+                        "monitor": "val_loss"
+                    }
+                },
+                {
+                    "class_name": "EarlyStopping", 
+                    "module_path": "nemo.lightning.pytorch.callbacks",
+                    "parameters": {
+                        "monitor": "val_loss",
+                        "patience": 10,
+                        "mode": "min"
+                    }
+                }
+            ]
+        }
+        """
+        self.callbacks = []
+        
+        if self.callback_cfg is None or "callbacks" not in self.callback_cfg:
+            print("No callback configuration found or callbacks section missing.")
+            return
+        
+        print("Initializing callbacks...")
+        
+        for callback_config in self.callback_cfg["callbacks"]:
+            try:
+                # Extract callback information
+                class_name = callback_config["class_name"]
+                module_path = callback_config["module_path"]
+                parameters = callback_config.get("parameters", {})
+                
+                # Dynamically import the module
+                module = importlib.import_module(module_path)
+                
+                # Get the callback class
+                CallbackClass = getattr(module, class_name)
+                
+                # Create callback instance with parameters
+                callback_instance = CallbackClass(**parameters)
+                
+                # Add to callbacks list
+                self.callbacks.append(callback_instance)
+                
+                print(f"Successfully initialized callback: {class_name}")
+                
+            except Exception as e:
+                print(f"Error initializing callback {callback_config.get('class_name', 'Unknown')}: {str(e)}")
+                continue
+        
+        print(f"Initialized {len(self.callbacks)} callbacks successfully!")
 
     def initialize_profiler(self):
         """
@@ -190,16 +261,18 @@ class Trainer:
 
         strategy = nl.MegatronStrategy(**self.trainer_cfg["strategy"])
 
-        callbacks = []
+        # Combine all callbacks (profiler + configured callbacks)
+        all_callbacks = []
         if self.profiler is not None:
-            callbacks.append(self.profiler)
+            all_callbacks.append(self.profiler)
+        all_callbacks.extend(self.callbacks)
 
         self.trainer = nl.Trainer(
             devices=self.trainer_cfg["devices"],
             max_steps=self.trainer_cfg["max_steps"],
             accelerator=self.trainer_cfg["accelerator"],
             strategy=strategy,
-            callbacks=callbacks,
+            callbacks=all_callbacks,
             plugins=nl.MegatronMixedPrecision(precision=self.trainer_cfg["precision"]),
             limit_val_batches=0,
         )
@@ -228,6 +301,7 @@ class Trainer:
         """
         
         self.initialize_profiler()
+        self.initialize_callbacks()
         self.initialize_model()
         self.initialize_data_module(data_module_type=self.data_cfg["dataModuleType"])
         self.initialize_optimizer()
@@ -307,4 +381,5 @@ class Trainer:
             "seq_length": self.data_cfg.get("seq_length") if self.data_cfg else None,
             "global_batch_size": self.data_cfg.get("global_batch_size") if self.data_cfg else None,
             "log_dir": self.logger_cfg.get("log_dir") if self.logger_cfg else None,
+            "num_callbacks": len(self.callbacks),
         }
