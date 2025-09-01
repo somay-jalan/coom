@@ -3,6 +3,7 @@ from coom.train import Trainer
 
 
 def main():
+    """Run the training experiment with the specified configurations."""
     # Ensure that the configs directory in coom contains a subfolder
     # with the same name, and that it includes the appropriate configuration files.
     experiment_name = "experiment_0"
@@ -19,5 +20,5 @@ def main():
     trainer.train()
 
 if __name__ == "__main__":
-    multiprocessing.set_start_method("spawn", force=True)  
+    multiprocessing.set_start_method("spawn", force=True)
     main()
