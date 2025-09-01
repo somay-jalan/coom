@@ -181,6 +181,8 @@ class Trainer:
         else:
             profiler_dir = os.path.join("profiler_logs", self.experiment_name)
         
+        os.makedirs(profiler_dir, exist_ok = True)
+        
         self.profiler = profiler.EKAProfiler(
             start_step = self.profiler_cfg["start_step"],
             end_step = self.profiler_cfg["end_step"],
@@ -287,9 +289,8 @@ class Trainer:
             raise ValueError("Logger configuration not loaded. Call load_configurations() first.")
 
         self.logger = nl.NeMoLogger(
-            log_dir=self.logger_cfg["log_dir"],
+            log_dir=os.path.join(self.logger_cfg["log_dir"], self.experiment_name, self.sub_experiment_name),
             update_logger_directory=True,
-            name=self.sub_experiment_name,
             use_datetime_version=False,
         )
 
