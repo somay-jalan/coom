@@ -1,7 +1,8 @@
-from nemo.collections.llm import PreTrainingDataModule
-import nemo.collections.llm.gpt.data.pre_training as pre_training
 from pathlib import Path
 import os
+from nemo.collections.llm import PreTrainingDataModule
+import nemo.collections.llm.gpt.data.pre_training as pre_training
+
 
 def eka_validate_dataset_asset_accessibility(paths):
     """
@@ -29,7 +30,7 @@ def eka_validate_dataset_asset_accessibility(paths):
     if pre_training.is_multistorageclient_url(paths):
         try:
             for suffix in suffices:
-                file_path = (paths + suffix)
+                file_path = paths + suffix
                 msc = pre_training.import_multistorageclient()
                 path = msc.Path(file_path)
             return
@@ -62,5 +63,3 @@ class EKAPreTrainingDataModule(PreTrainingDataModule):
     Currently identical to NeMo's PreTrainingDataModule.
     Defined separately for modularity, to allow future changes or extensions.
     """
-    pass
-

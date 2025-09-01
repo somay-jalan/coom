@@ -93,7 +93,7 @@ class Trainer:
         self.trainer_cfg = load_cfg(self.config_base_path, full_path("trainer_config_path"))[self.experiment_name]
         self.logger_cfg = load_cfg(self.config_base_path, full_path("logger_config_path"))[self.experiment_name]
         self.profiler_cfg = load_cfg(self.config_base_path, full_path("profiler_config_path"))[self.experiment_name]
-        
+
         # Load callback configuration if specified
         if "callback_config_path" in self.main_cfg:
             self.callback_cfg = load_cfg(self.config_base_path, full_path("callback_config_path"))[self.experiment_name]
@@ -103,7 +103,7 @@ class Trainer:
     def initialize_callbacks(self):
         """
         Initialize callbacks based on the callback configuration.
-        
+
         Expected callback_cfg structure:
         {
             "callbacks": [
@@ -118,7 +118,7 @@ class Trainer:
                     }
                 },
                 {
-                    "class_name": "EarlyStopping", 
+                    "class_name": "EarlyStopping",
                     "module_path": "nemo.lightning.pytorch.callbacks",
                     "parameters": {
                         "monitor": "val_loss",
@@ -130,38 +130,38 @@ class Trainer:
         }
         """
         self.callbacks = []
-        
+
         if self.callback_cfg is None or "callbacks" not in self.callback_cfg:
             print("No callback configuration found or callbacks section missing.")
             return
-        
+
         print("Initializing callbacks...")
-        
+
         for callback_config in self.callback_cfg["callbacks"]:
             try:
                 # Extract callback information
                 class_name = callback_config["class_name"]
                 module_path = callback_config["module_path"]
                 parameters = callback_config.get("parameters", {})
-                
+
                 # Dynamically import the module
                 module = importlib.import_module(module_path)
-                
+
                 # Get the callback class
-                CallbackClass = getattr(module, class_name)
-                
+                callback_class = getattr(module, class_name)
+
                 # Create callback instance with parameters
-                callback_instance = CallbackClass(**parameters)
-                
+                callback_instance = callback_class(**parameters)
+
                 # Add to callbacks list
                 self.callbacks.append(callback_instance)
-                
+
                 print(f"Successfully initialized callback: {class_name}")
-                
+
             except Exception as e:
                 print(f"Error initializing callback {callback_config.get('class_name', 'Unknown')}: {str(e)}")
                 continue
-        
+
         print(f"Initialized {len(self.callbacks)} callbacks successfully!")
 
     def initialize_profiler(self):
@@ -173,24 +173,22 @@ class Trainer:
             print("Profiler disabled.")
             return
 
-        
         print("Initializing profiler with configuration...")
-        
+
         if self.sub_experiment_name is not None:
             profiler_dir = os.path.join("profiler_logs", self.experiment_name, self.sub_experiment_name)
         else:
             profiler_dir = os.path.join("profiler_logs", self.experiment_name)
-        
-        os.makedirs(profiler_dir, exist_ok = True)
-        
-        self.profiler = profiler.EKAProfiler(
-            start_step = self.profiler_cfg["start_step"],
-            end_step = self.profiler_cfg["end_step"],
-            warmup_steps = self.profiler_cfg["warmup_steps"],
-            active_steps = self.profiler_cfg["active_steps"],
-            trace_dir = profiler_dir
-        )
 
+        os.makedirs(profiler_dir, exist_ok=True)
+
+        self.profiler = profiler.EKAProfiler(
+            start_step=self.profiler_cfg["start_step"],
+            end_step=self.profiler_cfg["end_step"],
+            warmup_steps=self.profiler_cfg["warmup_steps"],
+            active_steps=self.profiler_cfg["active_steps"],
+            trace_dir=profiler_dir
+        )
 
     def initialize_model(self):
         """
@@ -199,16 +197,16 @@ class Trainer:
         if self.main_cfg is None:
             raise ValueError("Main configuration not loaded. Call load_configurations() first.")
 
-        ModelClass = getattr(model, self.main_cfg["base_model"])
-        ConfigClass = getattr(config_classes, self.main_cfg["base_model_config"])
+        model_class = getattr(model, self.main_cfg["base_model"])
+        config_class = getattr(config_classes, self.main_cfg["base_model_config"])
 
-        model_config = ConfigClass(
+        model_config = config_class(
             **{
                 **self.model_cfg,
                 "seq_length": self.data_cfg["seq_length"],
                 "vocab_size": self.data_cfg["vocab_size"],
             })
-        self.model = ModelClass(model_config)
+        self.model = model_class(model_config)
 
         print(f"Model {self.main_cfg['base_model']} initialized successfully!")
 
@@ -230,14 +228,14 @@ class Trainer:
         elif data_module_type == "Real":
             if self.data_cfg["streaming"]:
                 os.environ["MSC_CONFIG"] = self.data_cfg["msc_config"]
-            DataModuleClass = getattr(data_module, self.main_cfg["data_model"])
-            self.data_module = DataModuleClass(
+            datamodule_class = getattr(data_module, self.main_cfg["data_model"])
+            self.data_module = datamodule_class(
                 paths=self.data_cfg["data_paths"],
                 seq_length=self.data_cfg["seq_length"],
                 micro_batch_size=self.data_cfg["micro_batch_size"],
                 global_batch_size=self.data_cfg["global_batch_size"],
-                object_storage_cache_path = self.data_cfg["object_storage_cache_path"],
-                mmap_bin_files = not(self.data_cfg["streaming"]) # basically True if not streaming otherwise false
+                object_storage_cache_path=self.data_cfg["object_storage_cache_path"],
+                mmap_bin_files=not self.data_cfg["streaming"]  # basically True if not streaming otherwise false
             )
 
         print("Data module initialized successfully!")
@@ -300,7 +298,7 @@ class Trainer:
         """
         Initialize all components required for training.
         """
-        
+
         self.initialize_profiler()
         self.initialize_callbacks()
         self.initialize_model()
@@ -343,7 +341,6 @@ class Trainer:
         self.validate_components()
 
         print("Starting training...")
-
 
         llm.train(
             model=self.model,
