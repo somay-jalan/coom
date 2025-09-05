@@ -342,12 +342,20 @@ class Trainer:
 
         print("Starting training...")
 
+        from nemo.lightning import AutoResume
+        resume = AutoResume(
+            resume_if_exists=True,
+            resume_ignore_no_checkpoint=True,
+            resume_from_path="test_logdir/experiment_0/trial/default/checkpoints/step_step=99-epoch_epoch=1-last",
+        )
+
+
         llm.train(
             model=self.model,
             data=self.data_module,
             trainer=self.trainer,
             log=self.logger,
-            # tokenizer="data",
+            resume=resume,
             optim=self.optimizer,
         )
 

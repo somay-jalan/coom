@@ -2,4 +2,11 @@ callbacks:
   - class_name: "OptimizerMonitor"
     module_path: "nemo.lightning.pytorch.callbacks"
     parameters:
+  - class_name: "ModelCheckpoint"
+    module_path: "nemo.lightning.pytorch.callbacks"
+    parameters:
+      every_n_train_steps : 50
+      save_top_k: -1
+      filename: "step_{step}-epoch_{epoch}"
+
   
