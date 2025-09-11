@@ -10,6 +10,7 @@ from nemo.collections import llm
 from omegaconf import DictConfig, OmegaConf
 
 from coom import config_classes, model, data_module, profiler
+from coom.data_module.load_and_validate_paths import load_data_paths
 
 
 def load_cfg(config_path: str, config_name: str) -> DictConfig:
@@ -84,19 +85,20 @@ class Trainer:
 
         prefix = self.main_cfg["config_path_prefix"]
 
-        def full_path(key):
-            return f"{self.experiment_name}{os.path.join(prefix, self.main_cfg[key])}"
+        def full_path(config, key):
+            return f"{self.experiment_name}{os.path.join(prefix, config[key])}"
 
-        self.model_cfg = load_cfg(self.config_base_path, full_path("base_model_configuration_path"))[self.experiment_name]
-        self.data_cfg = load_cfg(self.config_base_path, full_path("dataLoader_config_path"))[self.experiment_name]
-        self.opt_cfg = load_cfg(self.config_base_path, full_path("optimizer_config_path"))[self.experiment_name]
-        self.trainer_cfg = load_cfg(self.config_base_path, full_path("trainer_config_path"))[self.experiment_name]
-        self.logger_cfg = load_cfg(self.config_base_path, full_path("logger_config_path"))[self.experiment_name]
-        self.profiler_cfg = load_cfg(self.config_base_path, full_path("profiler_config_path"))[self.experiment_name]
+        self.model_cfg = load_cfg(self.config_base_path, full_path(self.main_cfg, "base_model_configuration_path"))[self.experiment_name]
+        self.data_cfg = load_cfg(self.config_base_path, full_path(self.main_cfg, "dataLoader_config_path"))[self.experiment_name]
+        self.opt_cfg = load_cfg(self.config_base_path, full_path(self.main_cfg, "optimizer_config_path"))[self.experiment_name]
+        self.trainer_cfg = load_cfg(self.config_base_path, full_path(self.main_cfg, "trainer_config_path"))[self.experiment_name]
+        self.logger_cfg = load_cfg(self.config_base_path, full_path(self.main_cfg, "logger_config_path"))[self.experiment_name]
+        self.profiler_cfg = load_cfg(self.config_base_path, full_path(self.main_cfg, "profiler_config_path"))[self.experiment_name]
+        self.data_paths_cfg = load_cfg(self.config_base_path, full_path(self.data_cfg, "data_paths_config_file"))[self.experiment_name]
 
         # Load callback configuration if specified
         if "callback_config_path" in self.main_cfg:
-            self.callback_cfg = load_cfg(self.config_base_path, full_path("callback_config_path"))[self.experiment_name]
+            self.callback_cfg = load_cfg(self.config_base_path, full_path(self.main_cfg, "callback_config_path"))[self.experiment_name]
 
         print("All configurations loaded successfully!")
 
@@ -215,7 +217,7 @@ class Trainer:
         Initialize the data module based on configuration.
 
         Args:
-            data_module_type (str): "Mock" (currently only supported option)
+            data_module_type (str): "Mock" or "Real"
         """
         if self.data_cfg is None:
             raise ValueError("Data configuration not loaded. Call load_configurations() first.")
@@ -227,18 +229,21 @@ class Trainer:
             )
         elif data_module_type == "Real":
             if self.data_cfg["streaming"]:
-                os.environ["MSC_CONFIG"] = self.data_cfg["msc_config"]
+                os.environ["MSC_CONFIG"] = os.path.join(self.config_base_path, f"{self.experiment_name}{os.path.join(self.main_cfg['config_path_prefix'], self.data_cfg['msc_config'])}")
+
+            processed_paths = load_data_paths(self.data_paths_cfg)
+
             datamodule_class = getattr(data_module, self.main_cfg["data_model"])
             self.data_module = datamodule_class(
-                paths=self.data_cfg["data_paths"],
+                paths=processed_paths,
                 seq_length=self.data_cfg["seq_length"],
                 micro_batch_size=self.data_cfg["micro_batch_size"],
                 global_batch_size=self.data_cfg["global_batch_size"],
                 object_storage_cache_path=self.data_cfg["object_storage_cache_path"],
-                mmap_bin_files=not self.data_cfg["streaming"]  # basically True if not streaming otherwise false
+                mmap_bin_files=not self.data_cfg["streaming"]
             )
 
-        print("Data module initialized successfully!")
+    print("Data module initialized successfully!")
 
     def initialize_optimizer(self):
         """
