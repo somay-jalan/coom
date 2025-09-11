@@ -8,5 +8,6 @@ callbacks:
       every_n_train_steps : 50
       save_top_k: -1
       filename: "step_{step}-epoch_{epoch}"
+      save_optim_on_train_end: True
 
   

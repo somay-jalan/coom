@@ -346,12 +346,13 @@ class Trainer:
         self.validate_components()
 
         print("Starting training...")
+        resume = None
 
         from nemo.lightning import AutoResume
         resume = AutoResume(
             resume_if_exists=True,
             resume_ignore_no_checkpoint=True,
-            resume_from_path="test_logdir/experiment_0/trial/default/checkpoints/step_step=99-epoch_epoch=1-last",
+            resume_from_path="test_logdir/experiment_0/trial/default/checkpoints/step_step=250-epoch_epoch=3-last",
         )
 
 
