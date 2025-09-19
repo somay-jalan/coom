@@ -8,6 +8,7 @@ from megatron.core.optimizer import OptimizerConfig
 from nemo import lightning as nl
 from nemo.collections import llm
 from omegaconf import DictConfig, OmegaConf
+from nemo.lightning.pytorch.strategies.utils import RestoreConfig
 
 from coom import config_classes, model, data_module, profiler
 from coom.data_module.load_and_validate_paths import load_data_paths
@@ -62,6 +63,7 @@ class Trainer:
         self.logger_cfg = None
         self.profiler_cfg = None
         self.callback_cfg = None
+        self.autoresume_cfg = None
 
         # Component containers
         self.model = None
@@ -99,6 +101,9 @@ class Trainer:
         # Load callback configuration if specified
         if "callback_config_path" in self.main_cfg:
             self.callback_cfg = load_cfg(self.config_base_path, full_path(self.main_cfg, "callback_config_path"))[self.experiment_name]
+        # Load autoresume configuration if specified
+        if "autoresume_config_path" in self.main_cfg:
+            self.autoresume_cfg = load_cfg(self.config_base_path, full_path(self.main_cfg, "autoresume_config_path"))[self.experiment_name]
 
         print("All configurations loaded successfully!")
 
@@ -165,6 +170,41 @@ class Trainer:
                 continue
 
         print(f"Initialized {len(self.callbacks)} callbacks successfully!")
+
+    def initialize_autoresume(self):
+        """
+        Initialize the AutoResume instance from configuration.
+        This enables automatic checkpoint discovery and restoration.
+        """
+        if self.autoresume_cfg is None:
+            print("No AutoResume configuration found. Skipping AutoResume setup.")
+            self.resume = None
+            return
+
+        print("Initializing AutoResume...")
+
+        # If restore_config is defined inside autoresume_cfg, construct it
+        restore_config_obj = None
+        if "restore_config" in self.autoresume_cfg and self.autoresume_cfg["restore_config"]:
+            restore_config_obj = RestoreConfig(
+                path=None,
+                load_model_state=self.autoresume_cfg["restore_config"].get("load_model_state", False),
+                load_optim_state=self.autoresume_cfg["restore_config"].get("load_optim_state", False),
+                load_artifacts=self.autoresume_cfg["restore_config"].get("load_artifacts", False),
+            )
+
+        # Create AutoResume instance
+        print(self.autoresume_cfg)
+        self.resume = nl.AutoResume(
+            restore_config=restore_config_obj,
+            resume_from_directory=self.autoresume_cfg.get("resume_from_directory", None),
+            resume_from_path=self.autoresume_cfg.get("resume_from_path", None),
+            resume_if_exists=self.autoresume_cfg.get("resume_if_exists", False),
+            resume_past_end=self.autoresume_cfg.get("resume_past_end", False),
+            resume_ignore_no_checkpoint=self.autoresume_cfg.get("resume_ignore_no_checkpoint", False),
+        )
+
+        print("AutoResume initialized successfully!")
 
     def initialize_profiler(self):
         """
@@ -311,6 +351,7 @@ class Trainer:
         self.initialize_optimizer()
         self.initialize_trainer()
         self.initialize_logger()
+        self.initialize_autoresume()
 
         print("All components initialized successfully!")
 
@@ -346,22 +387,13 @@ class Trainer:
         self.validate_components()
 
         print("Starting training...")
-        resume = None
-
-        from nemo.lightning import AutoResume
-        resume = AutoResume(
-            resume_if_exists=True,
-            resume_ignore_no_checkpoint=True,
-            resume_from_path="test_logdir/experiment_0/trial/default/checkpoints/step_step=250-epoch_epoch=3-last",
-        )
-
 
         llm.train(
             model=self.model,
             data=self.data_module,
             trainer=self.trainer,
             log=self.logger,
-            resume=resume,
+            resume=self.resume,
             optim=self.optimizer,
         )
 

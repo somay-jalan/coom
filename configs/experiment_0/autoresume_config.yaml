@@ -1,0 +1,5 @@
+resume_from_path : "test_logdir/experiment_0/trial/default/checkpoints/step_step=99-epoch_epoch=1-last"
+restore_config:
+  load_model_state: True
+  load_optim_state : True
+  load_artifacts : False
